@@ -1,0 +1,15 @@
+[PASS] IndexedFibonacciHeap: 무작위 연산 vs 정렬 집합                     1357 ms
+[PASS] IndexedFibonacciHeap: 경계·잘못된 요청                              6 ms
+[PASS] IndexedFibonacciHeap: 연쇄 절단이 차수 상한을 지킴                       9 ms
+[PASS] Dijkstra: Bellman-Ford 와 비교 (작은 그래프 300개)                   47 ms
+[PASS] Dijkstra: binary heap Dijkstra 와 비교 (큰 그래프)                348 ms
+[PASS] Dijkstra: 배송 지도 기대값                                          0 ms
+[PASS] Prim: Kruskal 과 비교 + 신장 숲 검사                                76 ms
+[PASS] Prim: 캠퍼스 지도 기대값                                             0 ms
+[PASS] MeldableFibonacciHeap: 여러 힙 무작위 연산 vs 모델                 23693 ms
+[PASS] MeldableFibonacciHeap: 잘못된 핸들 거부                             6 ms
+[PASS] MeldableFibonacciHeap: 같은 키는 삽입 순서(FIFO)                     0 ms
+[PASS] JobScheduler: 시나리오 실행 순서                                     2 ms
+[PASS] JobScheduler: 연쇄 장애 이관 후 소속 추적                               1 ms
+------------------------------------------------------------
+통과 13, 실패 0

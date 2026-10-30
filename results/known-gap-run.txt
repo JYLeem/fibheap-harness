@@ -1,0 +1,17 @@
+[FAIL] KnownGapTest.decreaseKeyOfExtractedNodeShouldBeRejected
+       java.lang.AssertionError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+[FAIL] KnownGapTest.decreaseKeyOfNodeFromAnotherHeapShouldBeRejected
+       java.lang.AssertionError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+[FAIL] KnownGapTest.decreaseKeyThroughHeapThatWasMeldedAwayShouldBeRejected
+       java.lang.AssertionError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.NullPointerException>
+------------------------------------------------------------
+통과 0, 실패 3, 건너뜀 84  (0.1 s)
+  FAILED KnownGapTest.decreaseKeyOfExtractedNodeShouldBeRejected : java.lang.AssertionError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+  FAILED KnownGapTest.decreaseKeyOfNodeFromAnotherHeapShouldBeRejected : java.lang.AssertionError: Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+  FAILED KnownGapTest.decreaseKeyThroughHeapThatWasMeldedAwayShouldBeRejected : java.lang.AssertionError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.NullPointerException>
+
+# 수정 후 (소속 힙 토큰 추가) 재실행
+[PASS] KnownGapTest.decreaseKeyOfExtractedNodeShouldBeRejected
+[PASS] KnownGapTest.decreaseKeyOfNodeFromAnotherHeapShouldBeRejected
+[PASS] KnownGapTest.decreaseKeyThroughHeapThatWasMeldedAwayShouldBeRejected
+통과 3, 실패 0

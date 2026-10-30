@@ -1,0 +1,16 @@
+Java 21.0.12.1, 중앙값(ms), 워밍업 3회 + 측정 7회
+
+[Dijkstra] 밀집 그래프 n=2,000, p=0.5  (간선 1998692)
+  Fibonacci heap : insert 2000, extractMin 2000, decreaseKey 10868 (간선 검사 1000721)
+  binary heap    : push 12871, poll 12871 (그중 낡은 항목 10871개 버림)
+  시간 Fibonacci 14.3 ms / binary 8.7 ms  (Fib/binary = 1.64)
+
+[Dijkstra] 희소 그래프 n=200,000, 정점당 5간선  (간선 999993)
+  Fibonacci heap : insert 198610, extractMin 198610, decreaseKey 90670 (간선 검사 500428)
+  binary heap    : push 289279, poll 289279 (그중 낡은 항목 89279개 버림)
+  시간 Fibonacci 245.9 ms / binary 170.0 ms  (Fib/binary = 1.45)
+
+[스케줄러 장애 이관] 대기열 200000건 + 200000건 병합
+  Fibonacci meld 0.0052 ms / PriorityQueue.addAll 9.4 ms
+
+(sink=0)

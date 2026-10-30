@@ -1,0 +1,207 @@
+# [기법 5] 표적 변이 목록 — tools/MutantRunner.java 가 사용
+# find 문자열은 Main.java 에서 정확히 한 번만 나타나야 한다 (아니면 INVALID 로 보고).
+# \n 은 줄바꿈, 앞쪽 공백도 그대로 비교한다. replace 가 비어 있으면 해당 코드를 삭제한다.
+# expect: killed | equivalent  (equivalent = 관찰 가능한 동작이 같아 원리적으로 탐지 불가로 예상)
+
+id: M01
+category: 비교 연산자
+desc: consolidate 에서 더 작은 키를 부모로 고르는 비교를 뒤집음
+find: if (y.key < x.key) {
+replace: if (y.key > x.key) {
+expect: killed
+
+id: M02
+category: 비교 연산자
+desc: decreaseKey 의 절단 조건 < 를 <= 로 (같은 키도 절단)
+find: if (y != null && x.key < y.key) {
+replace: if (y != null && x.key <= y.key) {
+expect: equivalent
+
+id: M03
+category: 비교 연산자
+desc: addRoot 의 min 갱신 비교를 뒤집음
+find: \n                if (x.key < min.key) min = x;
+replace: \n                if (x.key > min.key) min = x;
+expect: killed
+
+id: M04
+category: 비교 연산자
+desc: consolidate 후 min 재선택에서 < 를 <= 로 (동률이면 나중 루트 선택)
+find: if (r != null && (min == null || r.key < min.key)) min = r;
+replace: if (r != null && (min == null || r.key <= min.key)) min = r;
+expect: equivalent
+
+id: M05
+category: 비교 연산자
+desc: 키 증가 거부 조건 > 를 >= 로 (같은 키 요청도 예외)
+find: if (k > x.key) {
+replace: if (k >= x.key) {
+expect: killed
+
+id: M06
+category: degree 갱신 누락
+desc: link 에서 degree++ 누락
+find: x.degree++;
+replace:
+expect: killed
+
+id: M07
+category: degree 갱신 누락
+desc: cut 에서 degree-- 누락
+find: y.degree--;
+replace:
+expect: killed
+
+id: M08
+category: min 포인터 갱신 누락
+desc: decreaseKey 후 min 갱신 누락
+find: \n            if (x.key < min.key) min = x;
+replace: \n
+expect: killed
+
+id: M09
+category: min 포인터 갱신 누락
+desc: union 에서 상대 힙 min 이 더 작을 때 갱신 누락
+find: if (b.key < a.key) min = b;
+replace:
+expect: killed
+
+id: M10
+category: min 포인터 갱신 누락
+desc: consolidate 후 min 을 최솟값이 아닌 첫 루트로 설정
+find: if (r != null && (min == null || r.key < min.key)) min = r;
+replace: if (r != null && min == null) min = r;
+expect: killed
+
+id: M11
+category: 부모·자식 포인터
+desc: link 에서 y.parent = x 누락
+find: y.parent = x;
+replace:
+expect: killed
+
+id: M12
+category: 부모·자식 포인터
+desc: extractMin 에서 승격된 자식의 parent 초기화 누락
+find: c.parent = null;
+replace:
+expect: killed
+
+id: M13
+category: 부모·자식 포인터
+desc: cut 에서 부모의 child 포인터 갱신 누락
+find: if (y.child == x) y.child = (x.right == x) ? null : x.right;
+replace:
+expect: killed
+
+id: M14
+category: 부모·자식 포인터
+desc: addRoot 에서 parent = null 누락 (절단된 노드가 부모를 계속 가리킴)
+find: x.parent = null;
+replace:
+expect: killed
+
+id: M15
+category: 마킹 / cascading cut
+desc: cascadingCut 에서 mark 설정 누락
+find: y.mark = true;
+replace:
+expect: killed
+
+id: M16
+category: 마킹 / cascading cut
+desc: cascadingCut 조건 반전 (!y.mark → y.mark)
+find: if (!y.mark) {
+replace: if (y.mark) {
+expect: killed
+
+id: M17
+category: 마킹 / cascading cut
+desc: cascadingCut 재귀 호출 누락 (한 단계만 절단)
+find: cascadingCut(z);
+replace:
+expect: killed
+
+id: M18
+category: 마킹 / cascading cut
+desc: link 에서 mark 해제 누락
+find: y.mark = false;
+replace:
+expect: equivalent
+
+id: M19
+category: 마킹 / cascading cut
+desc: extractMin 에서 승격된 자식의 mark 해제 누락
+find: c.mark = false;
+replace:
+expect: killed
+
+id: M20
+category: size 갱신 누락
+desc: insert 에서 size++ 누락
+find: size++;
+replace:
+expect: killed
+
+id: M21
+category: size 갱신 누락
+desc: extractMin 에서 size-- 누락
+find: size--;
+replace:
+expect: killed
+
+id: M22
+category: size 갱신 누락
+desc: union 에서 size += other.size 누락
+find: size += other.size;
+replace:
+expect: killed
+
+id: M23
+category: size 갱신 누락
+desc: union 에서 상대 힙 size 초기화 누락
+find: other.size = 0;
+replace:
+expect: killed
+
+id: M24
+category: 병합 / 인덱스
+desc: union 에서 상대 힙 min 초기화 누락 (두 힙이 같은 노드를 공유)
+find: other.min = null;
+replace:
+expect: killed
+
+id: M25
+category: 병합 / 인덱스
+desc: union 에서 키 인덱스 병합 누락
+find: index.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).addAll(e.getValue());
+replace:
+expect: killed
+
+id: M26
+category: 병합 / 인덱스
+desc: decreaseKey 에서 이전 키의 인덱스 제거 누락
+find: removeFromIndex(x);
+replace:
+expect: killed
+
+id: M27
+category: 통합(consolidate)
+desc: 연결 후 차수 슬롯 비우기 누락
+find: byDegree.set(d, null);
+replace:
+expect: killed
+
+id: M28
+category: 파일 처리
+desc: test.txt 빈 줄 건너뛰기 누락
+find: if (line.isEmpty()) continue;
+replace:
+expect: killed
+
+id: M29
+category: 파일 처리
+desc: union 자기 자신 거부 누락 (heap API 는 무시하므로 결과가 OK 로 바뀜)
+find: if (a == b) throw new CommandException("같은 힙끼리는 union 할 수 없습니다: " + a);
+replace:
+expect: killed

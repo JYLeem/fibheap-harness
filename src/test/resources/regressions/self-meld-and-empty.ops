@@ -1,0 +1,16 @@
+# 빈 힙 삭제, 자기 자신과의 병합, 빈 힙끼리 병합, 같은 힙을 두 번 병합, 병합된 힙 재사용
+heaps 3
+extractMin 0
+findMin 1
+meld 0 0
+meld 0 1
+insert 2 5
+meld 0 2
+meld 0 2
+meld 1 0
+findMin 1
+insert 0 9
+decreaseNode 1 0 1
+extractMin 1
+extractMin 1
+decreaseNode 1 0 1

@@ -1,0 +1,14 @@
+# int 경계: MAX → 0 감소, 키 증가 요청 거부, MIN 으로 포화 감소, 동률 최솟값
+heaps 1
+insert 0 2147483647
+insert 0 -2147483648
+insert 0 0
+extractMin 0
+decreaseNode 0 0 2147483647
+decreaseNode 0 0 -1
+decreaseValue 0 0 2147483647
+decreaseValue 0 0 2147483647
+findMin 0
+extractMin 0
+extractMin 0
+extractMin 0

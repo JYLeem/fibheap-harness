@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fibonacci Heap 테스트 하네스
+    구현:   src/main/java/Main.java   (기존 코드 그대로, 기본 패키지)
+    테스트: src/test/java/*           (같은 기본 패키지 → package-private 인 Main.FibonacciHeap 에 접근)
+
+  mvn test                                   JUnit 5 + jqwik 실행, JaCoCo 리포트 생성 (target/site/jacoco)
+  mvn test -Dharness.scale=long              긴 퍼즈 실행
+  mvn test -Dgroups=known-gap -Dharness.excludedGroups=perf   알려진 계약 공백 테스트만 실행
+  mvn test-compile org.pitest:pitest-maven:mutationCoverage   PIT 변이 테스트 (target/pit-reports)
+  성능(JMH): perf-jmh/README 참고
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>local.fibheap</groupId>
+    <artifactId>fibheap-harness</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <junit.version>5.10.2</junit.version>
+        <jqwik.version>1.8.4</jqwik.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <pitest.version>1.16.1</pitest.version>
+        <pitest.junit5.version>1.2.1</pitest.junit5.version>
+
+        <!-- 테스트 실행 옵션 (-D 로 덮어쓰기) -->
+        <harness.scale>default</harness.scale>
+        <harness.excludedGroups>perf</harness.excludedGroups>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
+            <version>${jqwik.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <!-- jqwik 가 파라미터 이름을 리포트에 쓰도록 -->
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!-- JUnit Jupiter 와 jqwik 엔진이 모두 JUnit Platform 위에서 실행된다 -->
+                    <excludedGroups>${harness.excludedGroups}</excludedGroups>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <harness.scale>${harness.scale}</harness.scale>
+                        <harness.failureDir>${project.build.directory}/harness-failures</harness.failureDir>
+                        <file.encoding>UTF-8</file.encoding>
+                    </systemPropertyVariables>
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
+
+            <!-- [기법 9] JaCoCo: mvn test 시 target/site/jacoco/index.html (라인·분기 커버리지) -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <!-- 구현 안의 자체 테스트 코드는 측정 대상에서 제외 -->
+                        <exclude>Main$SelfTest*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- [기법 5] PIT: mvn test-compile org.pitest:pitest-maven:mutationCoverage → target/pit-reports/index.html -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>${pitest.junit5.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>Main*</param>
+                    </targetClasses>
+                    <excludedClasses>
+                        <param>Main$SelfTest*</param>
+                    </excludedClasses>
+                    <targetTests>
+                        <param>*Test</param>
+                    </targetTests>
+                    <!-- 성능 러너와 알려진 공백 테스트는 변이 판정에서 제외 -->
+                    <excludedTestClasses>
+                        <param>PerfRunner*</param>
+                        <param>KnownGapTest*</param>
+                    </excludedTestClasses>
+                    <!-- 구현 안의 검증 코드·진입점은 변이 대상에서 제외 (테스트는 독립 검사기를 사용) -->
+                    <excludedMethods>
+                        <param>main</param>
+                        <param>validate</param>
+                        <param>validateSubtree</param>
+                        <param>checkDegreeBound</param>
+                        <param>checkLinks</param>
+                        <param>check</param>
+                    </excludedMethods>
+                    <mutators>
+                        <mutator>STRONGER</mutator>
+                        <!-- 필드 대입 제거(degree/size/parent/mark 갱신 누락)를 만드는 변이 -->
+                        <mutator>EXPERIMENTAL_MEMBER_VARIABLE</mutator>
+                    </mutators>
+                    <jvmArgs>
+                        <value>-Dharness.scale=quick</value>
+                        <value>-Dharness.minimize=false</value>
+                    </jvmArgs>
+                    <timeoutConstant>8000</timeoutConstant>
+                    <threads>2</threads>
+                    <outputFormats>
+                        <param>HTML</param>
+                        <param>XML</param>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
